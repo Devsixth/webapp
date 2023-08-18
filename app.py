@@ -5,6 +5,7 @@ from flask_login import LoginManager, UserMixin, login_user, login_required, log
 from appwrite.services.users import Users
 from appwrite.id import ID
 import requests
+from waitress import serve
 
 
 app = Flask(__name__, static_url_path='/static')
@@ -189,7 +190,7 @@ def logout():
 
 
 if __name__ == '__main__':
-    app.run(host='localhost', debug=True)
+    serve(app, host='0.0.0.0', port=8000)
 
 
 # headers = {
