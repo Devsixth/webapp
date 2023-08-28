@@ -7,73 +7,55 @@
 <!--    </div>-->
 
     <!-- Signup container -->
-<div class="container col-md-4">
-    <h2>Sign Up</h2>
-    <form action="{{ url_for('signup')}}" method="POST">
-        <div class="form-group">
-            <label for="username">Username:</label>
-            <input type="text" class="form-control" name="username" id="username" value="{{ username }}" required>
-        </div>
-        <div class="form-group">
-            <label for="email">Email:</label>
-            <input type="email" class="form-control" name="email" id="email" value="{{ email }}" required>
-        </div>
-        <div class="form-group" style="margin-bottom: 0px;">
-            <label for="password">Password:</label>
-            <input type="password" class="form-control" name="password" id="password" required>
-        </div>
-        <div>
-            <span id="passwordHelpInline" class="form-text">Must be 8-20 characters long.</span>
-        </div>
-        <div class="form-group">
-            <label for="confirm_password">Confirm Password:</label>
-            <input type="password" class="form-control" name="confirm_password" id="confirm_password" required>
-        </div>
-        <div class="form-group">
-            <label for="phone_number">Phone Number:</label>
-            <input type="text" class="form-control" name="phone_number" id="phone_number" required>
-        </div>
-        <div class="form-group">
-          <label for="trading_exp">Trading Experience:</label>
-          <select class="form-control" name="trading_exp" id="trading_exp" required>
-            <option value="yes">Yes</option>
-            <option value="no">No</option>
-          </select>
-        </div>
-        <div class="form-group">
-          <label for="segment">Segment:</label>
-          <select class="form-control" name="segment" id="segment" required>
-            <option value="Cash">Cash</option>
-            <option value="Derivatives">Future</option>
-            <option value="Options">Index</option>
-            <option value="Equity">Options</option>
-          </select>
-        </div>
-<!--        {% if error %}-->
-<!--        <div class="alert alert-danger">{{ error_message }}</div>-->
-<!--        {% endif %}-->
-<!--        {% if success %}-->
-<!--        <div class="alert alert-success">{{ success_message }}</div>-->
-<!--        {% endif %}-->
-        <button type="submit" class="btn btn-primary mt-4" style="width: 100px;">Sign Up</button>
-
-    </form>
-    <div class="mt-4">
-        <p>Already have an account? <a href="/login">Log in</a></p>
-    </div>
-        {% with messages = get_flashed_messages(with_categories=true) %}
-        {% if messages %}
-            {% for category,message in messages %}
-                <div class="alert alert-{{category}}">
-<!--                        <div class="alert alert-danger" role="alert">-->
-                    <button type="button" class="m1-2 mb-1 close" data-dismiss="alert" aria-label="Close">
-                        <span aria-hidden="true">&times;</span>
-                    </button>
-                    {{ message }}
-                </div>
+    <div class="container col-md-4">
+        <h2>Sign Up</h2>
+        <form action="{{ url_for('signup')}}" method="POST">
+            <div class="form-group">
+                <label for="username">Username:</label>
+                <input type="text" class="form-control" name="username" id="username" value="{{ username }}" required>
+            </div>
+            <div class="form-group">
+                <label for="email">Email:</label>
+                <input type="email" class="form-control" name="email" id="email" value="{{ email }}" required>
+            </div>
+            <div class="form-group" style="margin-bottom: 0px;">
+                <label for="password">Password:</label>
+                <input type="password" class="form-control" name="password" id="password" required>
+            </div>
+            <div>
+                <span id="passwordHelpInline" class="form-text">Must be 8-20 characters long.</span>
+            </div>
+            <div class="form-group">
+                <label for="confirm_password">Confirm Password:</label>
+                <input type="password" class="form-control" name="confirm_password" id="confirm_password" required>
+            </div>
+            <div class="form-group">
+                <label for="phone_number">Phone Number:</label>
+                <input type="text" class="form-control" name="phone_number" id="phone_number" required>
+            </div>
+            <div class="form-group">
+                <label for="trading_exp">Trading Experience:</label>
+                <select class="form-control" name="trading_exp" id="trading_exp" required>
+                    <option value="0-1 year">0-1 Year</option>
+                    <option value="1 Year">1 Year</option>
+                    <option value="2-5 years">2-5 Years</option>
+                    <option value="more than 5 Years">More than 5 Years</option>
+                </select>
+            </div>
+            <div class="form-group">
+                <label>Segment:</label> <br>
+                {% for option in ['Cash', 'Future', 'Index', 'Options'] %}
+                    <label class="checkbox-inline" for="segment_{{ option.lower() }}">
+                        <input type="checkbox" name="segment" id="segment_{{ option.lower() }}" value="{{ option }}"> {{ option }}
+                    </label>
                 {% endfor %}
-            {% endif %}
-        {% endwith %}
-</div>
+            </div>
+
+            <button type="submit" class="btn btn-primary mt-4" style="width: 100px;">Sign Up</button>
+        </form>
+        <div class="mt-4">
+            <p>Already have an account? <a href="/login">Log in</a></p>
+        </div>
+    </div>
 
 {% endblock %}
