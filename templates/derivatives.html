@@ -5,5 +5,14 @@
     <div class="container text-info"><h1>
         This is from Derivatives
     </h1></div>
-
+                {% for doc in documents %}
+                    <p>
+                        Symbol: {{ doc["Symbol"] }}
+                        Signal: {{ doc["Signal"] }}
+                        Rate: {{ doc["Rate"] }}
+                        Target: {{ doc["Target"] }}
+                        Quantity: {{ doc["Quantity"] }}
+                    </p>
+                    <hr>
+                {% endfor %}
 {% endblock %}
