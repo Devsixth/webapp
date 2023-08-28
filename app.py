@@ -125,7 +125,6 @@ def signup():
             success_message = "A new user has been created"
             flash(f'{success_message}', category='success')
             return redirect(url_for('login'))
-
     return render_template('signup.html')
 
 
@@ -210,10 +209,9 @@ def login():
 
 
 @app.route('/logout')
-@login_required  # Protect this route, only logged-in users can log out
+@login_required  
 def logout():
-    delete_session()
-    logout_user()  # Log out the user
+    logout_user()  
     flash("You have been logged out!", category='info')
     return redirect(url_for('login'))
 
