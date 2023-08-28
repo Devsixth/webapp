@@ -53,14 +53,15 @@ def create_new_user(name, email, password, phone):
     print(created_user)
     return created_user
 
-def insert_user(username, email, phone, trading_exp, segment):
+def insert_user(username, email, phone, trading_exp, segment, date):
     databases = Databases(client)
     data = {
         "username": username,
         "email": email,
         "phone": phone,
         "trading_exp": trading_exp,
-        "segment": segment
+        "segment": segment,
+        "date": date
     }
     result = databases.create_document(databaseId, collectionId, ID.unique(), data)
     return result['$id']
@@ -111,13 +112,14 @@ def signup():
         phone_number = request.form.get('phone_number')
         trading_experience = request.form.get('trading_exp')
         segment = request.form.get('segment')
+        date = request.form.get('date')
         if password != confirm_password:
             error_message = "Passwords do not match"
             flash(error_message, category='danger')
             return render_template('signup.html')
         try:
             user = create_new_user(name, email, password, phone_number)
-            insert_user(name, email, phone_number, trading_experience, segment)
+            insert_user(name, email, phone_number, trading_experience, segment, date)
         except AppwriteException as e:
             flash(e, category='danger')
             return render_template('signup.html', error=True, error_message=e)
