@@ -1,8 +1,29 @@
 {% extends "new_base.html" %}
 
 {% block content %}
-          <br>
-    <div class="container text-info"><h1>
-        This is from cash
-    </h1></div>
+    <div class="container text-info"><h1>This is from cash</h1></div>
+<table class="table">
+            <thead>
+                <tr>
+                    <th>Symbol</th>
+                    <th>Signal</th>
+                    <th>Rate</th>
+                    <th>Target</th>
+                    <th>Quantity</th>
+                    <!-- Add more columns here if needed -->
+                </tr>
+            </thead>
+            <tbody>
+                {% for doc in documents %}
+                    <tr>
+                        <td>{{ doc["Symbol"] }}</td>
+                        <td>{{ doc["Signal"] }}</td>
+                        <td>{{ doc["Rate"] }}</td>
+                        <td>{{ doc["Target"] }}</td>
+                        <td>{{ doc["Quantity"] }}</td>
+                        <!-- Add more columns here if needed -->
+                    </tr>
+                {% endfor %}
+            </tbody>
+        </table>
 {% endblock %}
