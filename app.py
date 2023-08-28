@@ -3,23 +3,25 @@ from appwrite.exception import AppwriteException
 from flask import Flask, request, redirect, url_for, session, render_template, flash
 from flask_login import LoginManager, UserMixin, login_user, login_required, logout_user, current_user
 from appwrite.services.users import Users
+from appwrite.services.databases import Databases
 from appwrite.id import ID
 import requests
+import os
 from waitress import serve
 
+project_id = "64e6e1bc184f94861801"
 
 app = Flask(__name__, static_url_path='/static')
 app.secret_key = '0123456789'
-
 login_manager = LoginManager()
 login_manager.init_app(app)
 
 client = Client()
 client.set_endpoint("https://cloud.appwrite.io/v1")
-client.set_project('64d1de4bc952004af83b')
-client.set_key('b7d128a73e5c63bdefb139e034bf8216f4f16aa93cd008d5da6c4e225137fb8efb70ac7f83e24d841b731bef0be181062ad4c8d68ae3a456cf08a95a50641351491397183cb136531da261e44925b4889e53582a483e34a89141d6fbddbe3c9174af4b28ce39c0efb750498dfde4cc2256e7e46d366a45f8674db2b83d63f53b')
-databaseId = '64d1e050081fac6a3356'
-collectionId = '64d1e05de84b37097599'
+client.set_project(project_id)
+client.set_key("8905a3d9dd7d7c37ab085c038a34eacfa900ad4fd4a5e9cc5c8a1313ec061e8d06d0a5e1a2529dc1c14a025005f0e90315c04df540e7c53d2016424246aa284f9d22af5f4ec32901f805b458173c9c7d3ba84b509ea0868a30dc452a2f85c63dcac55f23dbe6e485aa87b59b9c0b9619107a613c440972636afc902e1049039b")
+databaseId = "64e6e238bd3d79bda710"
+collectionId = "64e8839e35cdb1292a9d"
 
 
 class User(UserMixin):
@@ -48,55 +50,56 @@ def create_new_user(name, email, password, phone):
         phone=phone,
         password=password
     )
+    print(created_user)
     return created_user
 
+def insert_user(username, email, phone, trading_exp, segment):
+    databases = Databases(client)
+    data = {
+        "username": username,
+        "email": email,
+        "phone": phone,
+        "trading_exp": trading_exp,
+        "segment": segment
+    }
+    result = databases.create_document(databaseId, collectionId, ID.unique(), data)
+    return result['$id']
 
-def get_session_cookies():
-    cookies = request.cookies.get('session')
-    print("cookies", cookies)
-    return cookies
-
-
-def delete_session():
-    session_id = session['session_id']
-    url = f"https://cloud.appwrite.io/v1/account/sessions/current"
-    headers = {'X-Appwrite-Project': '64d1de4bc952004af83b'}
-    response = requests.delete(url, headers=headers)
-    return response.status_code
-
-
-def get_account(cookie):
+def get_account():
     url = "https://cloud.appwrite.io/v1/account"
-    cookie = "a_session_"+'64d1de4bc952004af83b'+"="+str(cookie)
-    print(cookie)
-    headers1 = {'X-Appwrite-Project': '64d1de4bc952004af83b', 'Cookie': cookie}
-    response = requests.get(url, headers=headers1)
+    cookies = session['cookies']
+    headers = {'X-Appwrite-Project': project_id }
+    response = requests.get(url, headers=headers, cookies=cookies)
     data = response.json()
     print(data)
-    return data
+    return data['name']
 
 
 def authenticate_user(email, password):
     url = "https://cloud.appwrite.io/v1/account/sessions/email"
-    headers = {'X-Appwrite-Project': '64d1de4bc952004af83b'}
+    headers = {'X-Appwrite-Project': project_id}
     response = requests.post(url,
                              headers=headers,
                              json={'email': email, 'password': password})
-    cookie = request.cookies.get('session')
-    print(cookie)
-    print(response.json())
+
     if response.status_code == 201:
         session_data = response.json()
-        # session_id = session_data['$id']
         session_expire = session_data['expire']
+        cookies = response.cookies.get_dict()
         session['session_id'] = session_data['$id']
         print(f"Authenticated with session ID: {session['session_id']}")
         print(f'Session expire: {session_expire}')
-        return session_data['providerUid']
+        return session_data['providerUid'], cookies
     else:
         print('Authentication failed')
-        return None
+        return None, None
 
+
+def list_docs():
+    databases = Databases(client)
+    data = databases.list_documents(databaseId, '64e6e266b3c93226c01b')
+    print(data)
+    return data['documents']
 
 @app.route('/signup', methods=['GET', 'POST'])
 def signup():
@@ -106,17 +109,21 @@ def signup():
         password = request.form.get('password')
         confirm_password = request.form.get('confirm_password')
         phone_number = request.form.get('phone_number')
+        trading_experience = request.form.get('trading_exp')
+        segment = request.form.get('segment')
         if password != confirm_password:
             error_message = "Passwords do not match"
             flash(error_message, category='danger')
             return render_template('signup.html')
         try:
             user = create_new_user(name, email, password, phone_number)
+            insert_user(name, email, phone_number, trading_experience, segment)
         except AppwriteException as e:
+            flash(e, category='danger')
             return render_template('signup.html', error=True, error_message=e)
         else:
             success_message = "A new user has been created"
-            flash(f'Login successful! Welcome {success_message}', category='success')
+            flash(f'{success_message}', category='success')
             return redirect(url_for('login'))
 
     return render_template('signup.html')
@@ -126,26 +133,33 @@ def signup():
 @login_required
 def home():
     user_id = session['user_email']
+    user_name = get_account()
     user = load_user(user_id)
     # print(f"Login successful for the user {user.id}")
-    flash(f"Login successful! Welcome {user.id}", category='success')
+    # flash(f"Login successful! Welcome {user_name}", category='success')
     return render_template('home.html')
-# def home():
-#     # name = get_account()
-#     # return f"Login successful for the user {current_user.id}"
-#     return render_template('home.html')
 
 
 @app.route('/cash')
 @login_required
 def cash():
-    return render_template('cash.html')
+    try:
+        documents = list_docs()
+        print(documents)
+    except AppwriteException as e:
+        flash(e.message, category='danger')
+    return render_template('cash.html', documents=documents)
 
 
 @app.route('/derivatives')
 @login_required
 def derivatives():
-    return render_template('derivatives.html')
+    try:
+        documents = list_docs()
+        print(documents)
+    except AppwriteException as e:
+        flash(e.message, category='danger')
+    return render_template('derivatives.html',documents=documents)
 
 
 @app.route('/history')
@@ -159,24 +173,39 @@ def history():
 def options():
     return render_template('options.html')
 
+
+@app.route('/news')
+@login_required
+def news():
+    return render_template('news.html')
+
+
 @app.route('/')
 @app.route('/login', methods=['GET', 'POST'])
 def login():
     if request.method == 'POST':
         email = request.form.get('email')
         password = request.form.get('password')
+        remember_me = request.form.get('rememberMe')
         try:
-            user_email = authenticate_user(email, password)
+            user_email, cookies = authenticate_user(email, password)
             if user_email:
                 login_user(load_user(user_email))
                 session['user_email'] = user_email
+                session['cookies'] = cookies
+                user_name = get_account()
+                if remember_me:
+                    session.permanent = True
+                else:
+                    session.permanent = False
+                flash(f"Login successful! Welcome {user_name}", category='success')
                 return redirect(url_for('home'))
             else:
                 error_message = "Invalid email or password"
                 flash(error_message, category='danger')
         except AppwriteException as e:
-            error_message = e
-        # flash(error_message, category='danger')
+            error_message = e.message
+            flash(error_message, category='danger')
     return render_template('login.html')
 
 
@@ -193,7 +222,3 @@ if __name__ == '__main__':
     serve(app, host='0.0.0.0', port=8000)
 
 
-# headers = {
-#   'X-Appwrite-Project': '64d1de4bc952004af83b',
-#   'Cookie': 'a_session_64cfa4194d98073dddde=eyJfZnJlc2giOmZhbHNlLCJ1c2VyX2VtYWlsIjoibXVubnVzaGVyaWZmQGdtYWlsLmNvbSJ9.ZM-4dA.fysxGOT9veU0Jck-C3kW6fflrUY'
-# }
