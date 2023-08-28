@@ -1,29 +1,18 @@
 {% extends "new_base.html" %}
 
 {% block content %}
-    <div class="container text-info"><h1>Cash</h1></div>
-<table class="table">
-            <thead>
-                <tr>
-                    <th>Symbol</th>
-                    <th>Signal</th>
-                    <th>Rate</th>
-                    <th>Target</th>
-                    <th>Quantity</th>
-                    <!-- Add more columns here if needed -->
-                </tr>
-            </thead>
-            <tbody>
-                {% for doc in documents %}
-                    <tr>
-                        <td>{{ doc["Symbol"] }}</td>
-                        <td>{{ doc["Signal"] }}</td>
-                        <td>{{ doc["Rate"] }}</td>
-                        <td>{{ doc["Target"] }}</td>
-                        <td>{{ doc["Quantity"] }}</td>
-                        <!-- Add more columns here if needed -->
-                    </tr>
-                {% endfor %}
-            </tbody>
-        </table>
+    <div class="container text-info"><h1>CASH CALLS</h1></div>
+    <br>
+    {% for doc in documents %}
+        <div class="document">
+            <p class="font"><strong></strong>{{ doc["Symbol"] }}</p>
+            <p class="right-aligned"><strong>Signal: </strong>{{ doc["Signal"] }},</p>
+            <p class="right-aligned"><strong>Rate: </strong>{{ doc["Rate"] }},</p>
+            <p class="right-aligned"><strong>Target: </strong>{{ doc["Target"] }},</p>
+            <p class="right-aligned"><strong>Quantity: </strong>{{ doc["Quantity"] }}(1Lakh),</p>
+        </div>
+        <hr>
+    {% endfor %}
 {% endblock %}
+
+
