@@ -22,7 +22,6 @@ client.set_key("8905a3d9dd7d7c37ab085c038a34eacfa900ad4fd4a5e9cc5c8a1313ec061e8d
 databaseId = "64e6e238bd3d79bda710"
 collectionId = "64e8839e35cdb1292a9d"
 
-
 class User(UserMixin):
     def __init__(self, id):
         self.id = id
@@ -62,8 +61,6 @@ def create_new_user(name, email, password, phone):
                 counter += 1
             else:
                 raise e
-
-
 def insert_user(username, email, phone, trading_exp, segment, user, date):
     databases = Databases(client)
     data = {
@@ -77,23 +74,6 @@ def insert_user(username, email, phone, trading_exp, segment, user, date):
     }
     result = databases.create_document(databaseId, collectionId, ID.unique(), data)
     return result['$id']
-
-
-def delete_session():
-    session_id = session['session_id']
-    cookies = session['cookies']
-    delete_session_url = f"https://cloud.appwrite.io/v1/account/sessions/{session_id}"
-    payload = {}
-    headers = {'X-Appwrite-Project': project_id }
-    response = requests.delete(delete_session_url, headers=headers, data=payload,
-                               cookies=cookies)
-    if response.status_code == 204:
-        print(f"Session {session_id} deleted successfully")
-    else:
-        print(f"Failed to delete session {session_id}")
-        print("Response:", response.status_code, response.content)
-    return response.status_code
-
 
 def get_account():
     url = "https://cloud.appwrite.io/v1/account"
@@ -126,31 +106,10 @@ def authenticate_user(email, password):
 
 
 def list_docs():
-    # url = f"https://cloud.appwrite.io/v1/databases/{databaseId}/collections/64e6e266b3c93226c01b/documents"
-    # cookies = session['cookies']
-    # headers = {'X-Appwrite-Project': project_id}
-    # response = requests.get(url, headers=headers, cookies = cookies)
-    # data = response.json()
-    # print(data)
     databases = Databases(client)
     data = databases.list_documents(databaseId, '64e6e266b3c93226c01b')
     print(data)
     return data['documents']
-
-
-@app.route('/oauth_login')
-def oauth_login():
-    url = "https://cloud.appwrite.io/v1/account/sessions/oauth2/google"
-    headers = {'X-Appwrite-Project': project_id}
-    params = {
-        'success': 'http://localhost:5000/home',
-        'failure': 'http://localhost:5000'
-    }
-    response = requests.get(url, params=params, headers=headers)
-    cookies = response.cookies.get_dict()
-    google_page = response.text
-    # print(google_page)
-    return google_page
 
 
 @app.route('/signup', methods=['GET', 'POST'])
