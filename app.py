@@ -7,6 +7,7 @@ from appwrite.services.databases import Databases
 from appwrite.id import ID
 import requests
 import os
+from waitress import serve
 
 project_id = "64e6e1bc184f94861801"
 
@@ -231,6 +232,6 @@ def logout():
 
 
 if __name__ == '__main__':
-    app.run(host='localhost', debug=True)
+    serve(app, host='0.0.0.0', port=8000)
 
 
