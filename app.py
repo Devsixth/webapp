@@ -23,45 +23,38 @@ client.set_key("8905a3d9dd7d7c37ab085c038a34eacfa900ad4fd4a5e9cc5c8a1313ec061e8d
 databaseId = "64e6e238bd3d79bda710"
 collectionId = "64e8839e35cdb1292a9d"
 
+
 class User(UserMixin):
     def __init__(self, id):
         self.id = id
 
     def is_active(self):
-        return True  
+        return True  # Return True if the user is active
 
     def is_authenticated(self):
-        return True  
+        return True  # Return True if the user is authenticated
 
 
 @login_manager.user_loader
 def load_user(user_id):
+    # Create and return a User object based on the user_id
     return User(user_id)
 
 
-def generate_user_id(counter):
-    return f"S{counter:04d}"  
-
 def create_new_user(name, email, password, phone):
     users = Users(client)
-    counter = 1  
-    while True:
-        user_id = generate_user_id(counter)
-        try:
-            created_user = users.create(
-                user_id=user_id,
-                name=name,
-                email=email,
-                phone=phone,
-                password=password
-            )
-            print(created_user)
-            return created_user
-        except AppwriteException as e:
-            if "ID is already in use" in e.message:
-                counter += 1
-            else:
-                raise e
+    print(users)
+    created_user = users.create(
+        user_id=ID.unique(),
+        name=name,
+        email=email,
+        phone=phone,
+        password=password
+    )
+    print(created_user)
+    return created_user['$id']
+
+
 def insert_user(username, email, phone, trading_exp, segment, user, date):
     databases = Databases(client)
     data = {
@@ -75,6 +68,7 @@ def insert_user(username, email, phone, trading_exp, segment, user, date):
     }
     result = databases.create_document(databaseId, collectionId, ID.unique(), data)
     return result['$id']
+
 
 def get_account():
     url = "https://cloud.appwrite.io/v1/account"
@@ -112,7 +106,6 @@ def list_docs():
     print(data)
     return data['documents']
 
-
 @app.route('/signup', methods=['GET', 'POST'])
 def signup():
     if request.method == 'POST':
@@ -130,7 +123,7 @@ def signup():
             return render_template('signup.html')
         try:
             user = create_new_user(name, email, password, phone_number)
-            insert_user(name, email, phone_number, trading_experience, segment, user['$id'], date)
+            insert_user(name, email, phone_number, trading_experience, segment, user, date)
         except AppwriteException as e:
             flash(e, category='danger')
             return render_template('signup.html', error=True, error_message=e)
@@ -167,12 +160,7 @@ def cash():
 @app.route('/derivatives')
 @login_required
 def derivatives():
-    try:
-        documents = list_docs()
-        print(documents)
-    except AppwriteException as e:
-        flash(e.message, category='danger')
-    return render_template('derivatives.html',documents=documents)
+    return render_template('derivatives.html')
 
 
 @app.route('/history')
