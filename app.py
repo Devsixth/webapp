@@ -7,12 +7,11 @@ from appwrite.services.databases import Databases
 from appwrite.id import ID
 import requests
 import os
-from waitress import serve
 
 project_id = "64e6e1bc184f94861801"
 
 app = Flask(__name__, static_url_path='/static')
-app.secret_key = '0123456789'
+app.secret_key = os.urandom(24)
 login_manager = LoginManager()
 login_manager.init_app(app)
 
@@ -29,33 +28,46 @@ class User(UserMixin):
         self.id = id
 
     def is_active(self):
-        return True  # Return True if the user is active
+        return True  
 
     def is_authenticated(self):
-        return True  # Return True if the user is authenticated
+        return True  
 
 
 @login_manager.user_loader
 def load_user(user_id):
-    # Create and return a User object based on the user_id
     return User(user_id)
 
 
+def generate_user_id(counter):
+    return f"S{counter:04d}"  
+
 def create_new_user(name, email, password, phone):
     users = Users(client)
-    created_user = users.create(
-        user_id=ID.unique(),
-        name=name,
-        email=email,
-        phone=phone,
-        password=password
-    )
-    print(created_user)
-    return created_user
+    counter = 1  
+    while True:
+        user_id = generate_user_id(counter)
+        try:
+            created_user = users.create(
+                user_id=user_id,
+                name=name,
+                email=email,
+                phone=phone,
+                password=password
+            )
+            print(created_user)
+            return created_user
+        except AppwriteException as e:
+            if "ID is already in use" in e.message:
+                counter += 1
+            else:
+                raise e
 
-def insert_user(username, email, phone, trading_exp, segment, date):
+
+def insert_user(username, email, phone, trading_exp, segment, user, date):
     databases = Databases(client)
     data = {
+        "id": user,
         "username": username,
         "email": email,
         "phone": phone,
@@ -65,6 +77,23 @@ def insert_user(username, email, phone, trading_exp, segment, date):
     }
     result = databases.create_document(databaseId, collectionId, ID.unique(), data)
     return result['$id']
+
+
+def delete_session():
+    session_id = session['session_id']
+    cookies = session['cookies']
+    delete_session_url = f"https://cloud.appwrite.io/v1/account/sessions/{session_id}"
+    payload = {}
+    headers = {'X-Appwrite-Project': project_id }
+    response = requests.delete(delete_session_url, headers=headers, data=payload,
+                               cookies=cookies)
+    if response.status_code == 204:
+        print(f"Session {session_id} deleted successfully")
+    else:
+        print(f"Failed to delete session {session_id}")
+        print("Response:", response.status_code, response.content)
+    return response.status_code
+
 
 def get_account():
     url = "https://cloud.appwrite.io/v1/account"
@@ -97,10 +126,32 @@ def authenticate_user(email, password):
 
 
 def list_docs():
+    # url = f"https://cloud.appwrite.io/v1/databases/{databaseId}/collections/64e6e266b3c93226c01b/documents"
+    # cookies = session['cookies']
+    # headers = {'X-Appwrite-Project': project_id}
+    # response = requests.get(url, headers=headers, cookies = cookies)
+    # data = response.json()
+    # print(data)
     databases = Databases(client)
     data = databases.list_documents(databaseId, '64e6e266b3c93226c01b')
     print(data)
     return data['documents']
+
+
+@app.route('/oauth_login')
+def oauth_login():
+    url = "https://cloud.appwrite.io/v1/account/sessions/oauth2/google"
+    headers = {'X-Appwrite-Project': project_id}
+    params = {
+        'success': 'http://localhost:5000/home',
+        'failure': 'http://localhost:5000'
+    }
+    response = requests.get(url, params=params, headers=headers)
+    cookies = response.cookies.get_dict()
+    google_page = response.text
+    # print(google_page)
+    return google_page
+
 
 @app.route('/signup', methods=['GET', 'POST'])
 def signup():
@@ -119,7 +170,7 @@ def signup():
             return render_template('signup.html')
         try:
             user = create_new_user(name, email, password, phone_number)
-            insert_user(name, email, phone_number, trading_experience, segment, date)
+            insert_user(name, email, phone_number, trading_experience, segment, user['$id'], date)
         except AppwriteException as e:
             flash(e, category='danger')
             return render_template('signup.html', error=True, error_message=e)
@@ -127,6 +178,7 @@ def signup():
             success_message = "A new user has been created"
             flash(f'{success_message}', category='success')
             return redirect(url_for('login'))
+
     return render_template('signup.html')
 
 
@@ -211,14 +263,15 @@ def login():
 
 
 @app.route('/logout')
-@login_required  
+@login_required  # Protect this route, only logged-in users can log out
 def logout():
-    logout_user()  
+    delete_session()
+    logout_user()  # Log out the user
     flash("You have been logged out!", category='info')
     return redirect(url_for('login'))
 
 
 if __name__ == '__main__':
-    serve(app, host='0.0.0.0', port=8000)
+    app.run(host='localhost', debug=True)
 
 
