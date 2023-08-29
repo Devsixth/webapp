@@ -29,10 +29,10 @@ class User(UserMixin):
         self.id = id
 
     def is_active(self):
-        return True 
+        return True  # Return True if the user is active
 
     def is_authenticated(self):
-        return True 
+        return True  # Return True if the user is authenticated
 
 
 @login_manager.user_loader
@@ -101,17 +101,10 @@ def authenticate_user(email, password):
 
 
 def list_docs():
-    # url = f"https://cloud.appwrite.io/v1/databases/{databaseId}/collections/64e6e266b3c93226c01b/documents"
-    # cookies = session['cookies']
-    # headers = {'X-Appwrite-Project': project_id}
-    # response = requests.get(url, headers=headers, cookies = cookies)
-    # data = response.json()
-    # print(data)
     databases = Databases(client)
     data = databases.list_documents(databaseId, '64e6e266b3c93226c01b')
     print(data)
     return data['documents']
-
 
 
 @app.route('/signup', methods=['GET', 'POST'])
@@ -168,7 +161,12 @@ def cash():
 @app.route('/derivatives')
 @login_required
 def derivatives():
-   return render_template('derivatives.html')
+    try:
+        documents = list_docs()
+        print(documents)
+    except AppwriteException as e:
+        flash(e.message, category='danger')
+    return render_template('derivatives.html',documents=documents)
 
 
 @app.route('/history')
@@ -219,9 +217,10 @@ def login():
 
 
 @app.route('/logout')
-@login_required  
+@login_required  # Protect this route, only logged-in users can log out
 def logout():
-     logout_user() 
+    delete_session()
+    logout_user()  # Log out the user
     flash("You have been logged out!", category='info')
     return redirect(url_for('login'))
 
