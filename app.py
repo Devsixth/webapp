@@ -8,6 +8,7 @@ from appwrite.id import ID
 import requests
 import os
 from waitress import serve
+from datetime import datetime, timedelta
 
 project_id = "64e6e1bc184f94861801"
 
@@ -142,9 +143,10 @@ def home():
     user_id = session['user_email']
     user_name = get_account()
     user = load_user(user_id)
-    # print(f"Login successful for the user {user.id}")
-    # flash(f"Login successful! Welcome {user_name}", category='success')
-    return render_template('home.html')
+    expiration_date = datetime.now() + timedelta(days=7)
+    expiration_date_str = expiration_date.strftime("%d/%m/%Y")
+    signup_date_str = session.get('signup_date', '') 
+    return render_template('home.html', user_name=user_name, expiration_date=expiration_date_str, signup_date=signup_date_str)
 
 
 @app.route('/cash')
