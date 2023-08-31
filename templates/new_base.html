@@ -79,32 +79,32 @@
         </ul>
         <ul class="navbar-nav ml-auto">
             <li class="nav-item">
-                <a class="nav-link" data-toggle="modal" href="#Modal-UserInfo-{{current_user.id}}">Welcome, {{
-                    current_user.id }}</a>
-            </li>
-            <li class="nav-item">
-                <a class="nav-link" href="{{ url_for('logout') }}">Logout</a>
-            </li>
-        </ul>
-        {% else %}
-         <ul class="navbar-nav ml-auto">
-            <li class="nav-item">
                 <div class="dropdown">
                     <a class="nav-link dropdown-toggle" href="#" role="button" data-toggle="dropdown">
-                        <ion-icon name="person-outline"></ion-icon>
-                    </a>
+                          <ion-icon name="person-outline"></ion-icon>
+                      </a>
                     <div class="dropdown-menu dropdown-menu-right">
-                        <a class="dropdown-item" href="{{ url_for('login') }}">
-                            <ion-icon name="log-in-outline"></ion-icon> Login
+                        <a class="dropdown-item" data-toggle="modal" href="#Modal-UserInfo-{{current_user.id}}">
+                             <ion-icon name="log-in-outline"></ion-icon> Welcome, {{current_user.id }}
                         </a>
-                        <a class="dropdown-item" href="{{ url_for('signup') }}">
-                            <ion-icon name="person-add-outline"></ion-icon> Register
+                        <a class="dropdown-item" href="{{ url_for('logout') }}">
+                             <ion-icon name="person-add-outline"></ion-icon>Logout
                         </a>
-                    </div>
+                  </div>
                 </div>
+         </li>
+        </ul>
+        {% else %}
+        <ul class="navbar-nav ml-auto">
+            <li class="nav-item">
+                <a class="nav-link" href="{{ url_for('login') }}">Login</a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link" href="{{ url_for('signup')}}">Register</a>
             </li>
         </ul>
         {% endif %}
+
     </div>
 </nav>
 <br>
