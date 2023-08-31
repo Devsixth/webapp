@@ -56,16 +56,17 @@ def create_new_user(name, email, password, phone):
     return created_user['$id']
 
 
-def insert_user(username, email, phone, trading_exp, segment, user, date):
+def insert_user(username, email, phone, trading_exp, segment, date, assign_id):
     databases = Databases(client)
     data = {
-        "id": user,
+        "id": assign_id,
         "username": username,
         "email": email,
         "phone": phone,
         "trading_exp": trading_exp,
         "segment": segment,
-        "date": date
+        "date": date,
+
     }
     result = databases.create_document(databaseId, collectionId, ID.unique(), data)
     return result['$id']
@@ -108,6 +109,34 @@ def list_docs():
     return data['documents']
 
 
+def get_latest_id(signup_db_col_id):
+    databases = Databases(client)
+    data = databases.list_documents(databaseId, signup_db_col_id)
+    # print(data)
+    docs = data['documents']
+    if len(docs) == 0:
+        return "S0001"
+    latest_id = docs[-1]['id']
+    print("latest id",  latest_id)
+    inc_by_1 = int(latest_id[1:]) + 1
+    new_id = f"S{'0'* (5 - (len(str(inc_by_1)) + 1))}{inc_by_1}"
+    print("new id",new_id)
+    return new_id
+
+
+def get_user_signup_date(signup_db_col_id, user_email):
+    databases = Databases(client)
+    data = databases.list_documents(databaseId, signup_db_col_id)
+    # print(data)
+    print(user_email)
+    for item in data['documents']:
+        if item['email'] == user_email:
+            print(item['email'], user_email)
+            print(item['date'])
+            return item['date']
+    return None
+
+
 @app.route('/signup', methods=['GET', 'POST'])
 def signup():
     if request.method == 'POST':
@@ -118,14 +147,16 @@ def signup():
         phone_number = request.form.get('phone_number')
         trading_experience = request.form.get('trading_exp')
         segment = request.form.get('segment')
-        date = request.form.get('date')
         if password != confirm_password:
             error_message = "Passwords do not match"
             flash(error_message, category='danger')
             return render_template('signup.html')
         try:
             user = create_new_user(name, email, password, phone_number)
-            insert_user(name, email, phone_number, trading_experience, segment, user, date)
+            latest_id = get_latest_id(collectionId)
+            current_datetime = datetime.now()
+            current_datetime_str = current_datetime.strftime("%d-%m-%YT%H:%M:%S")
+            insert_user(name, email, phone_number, trading_experience, segment, current_datetime_str, latest_id)
         except AppwriteException as e:
             flash(e, category='danger')
             return render_template('signup.html', error=True, error_message=e)
@@ -143,9 +174,10 @@ def home():
     user_id = session['user_email']
     user_name = get_account()
     user = load_user(user_id)
-    expiration_date = datetime.now() + timedelta(days=7)
+    signup_date = get_user_signup_date(collectionId, user_id)
+    expiration_date = datetime.strptime(signup_date[:10], "%d-%m-%Y") + timedelta(days=7)
     expiration_date_str = expiration_date.strftime("%d/%m/%Y")
-    signup_date_str = session.get('signup_date', '') 
+    signup_date_str = session.get('signup_date', '')
     return render_template('home.html', user_name=user_name, expiration_date=expiration_date_str, signup_date=signup_date_str)
 
 
@@ -221,13 +253,12 @@ def login():
 @app.route('/logout')
 @login_required  # Protect this route, only logged-in users can log out
 def logout():
-    delete_session()
     logout_user()  # Log out the user
     flash("You have been logged out!", category='info')
     return redirect(url_for('login'))
 
-
 if __name__ == '__main__':
     serve(app, host='0.0.0.0', port=8000)
+
 
 
