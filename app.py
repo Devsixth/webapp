@@ -192,16 +192,15 @@ def cash():
     return render_template('cash.html', documents=documents)
 
 
-@app.route('/derivatives')
+@app.route('/future')
 @login_required
-def derivatives():
-    try:
-        documents = list_docs()
-        print(documents)
-    except AppwriteException as e:
-        flash(e.message, category='danger')
-    return render_template('derivatives.html',documents=documents)
+def future():
+    return render_template('future.html')
 
+@app.route('/index')
+@login_required
+def index():
+    return render_template('index.html')
 
 @app.route('/history')
 @login_required
