@@ -42,22 +42,25 @@
         font-weight: bolder;
         margin-left: 60px;
         }
+      .navbar-nav-list{
+         font-weight: bold;
+          font-size: 25px;
+      }
+       .item{
+           font-weight: bold;
+       }
 
 </style>
 </head>
 <body>
 <nav class="navbar navbar-expand-md navbar-dark  bg-dark">
-    <a class="navbar-brand" href="#">Meta Algo</a>
-    <button class="navbar-toggler" data-target="#navbarNav" data-toggle="collapse" type="button">
-        <span class="navbar-toggler-icon"></span>
-    </button>
 <!--    <div class="collapse navbar-collapse" id="navbarNav">-->
 <!--        <ul class="navbar-nav ">-->
 
 
 <!--        </ul>-->
         {% if current_user.is_authenticated %}
-        <ul class="navbar-nav">
+        <ul class="navbar-nav navbar-nav-list">
                   <li class="nav-item">
                             <a class="nav-link" href="{{ url_for('home') }}">Home <span class="sr-only">(current)</span></a>
                         </li>
@@ -78,7 +81,7 @@
                         </li>
         </ul>
         <ul class="navbar-nav ml-auto">
-            <li class="nav-item">
+            <li class="nav-item navbar-nav-list">
                 <div class="dropdown">
                     <a class="nav-link dropdown-toggle" href="#" role="button" data-toggle="dropdown">
                           <ion-icon name="person-outline"></ion-icon>
@@ -96,7 +99,7 @@
         </ul>
         {% else %}
         <ul class="navbar-nav ml-auto">
-            <li class="nav-item">
+            <li class="nav-item item">
                 <a class="nav-link" href="{{ url_for('login') }}">Login</a>
             </li>
             <li class="nav-item">
