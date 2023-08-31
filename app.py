@@ -13,7 +13,7 @@ from datetime import datetime, timedelta
 project_id = "64e6e1bc184f94861801"
 
 app = Flask(__name__, static_url_path='/static')
-app.secret_key = 12345678
+app.secret_key = os.urandom(24)
 login_manager = LoginManager()
 login_manager.init_app(app)
 
@@ -120,7 +120,7 @@ def get_latest_id(signup_db_col_id):
     print("latest id",  latest_id)
     inc_by_1 = int(latest_id[1:]) + 1
     new_id = f"S{'0'* (5 - (len(str(inc_by_1)) + 1))}{inc_by_1}"
-    print("new id",new_id)
+    print("new id", new_id)
     return new_id
 
 
@@ -202,6 +202,8 @@ def future():
 def index():
     return render_template('index.html')
 
+
+
 @app.route('/history')
 @login_required
 def history():
@@ -255,7 +257,7 @@ def logout():
     logout_user()  # Log out the user
     flash("You have been logged out!", category='info')
     return redirect(url_for('login'))
-
+    
 if __name__ == '__main__':
     serve(app, host='0.0.0.0', port=8000)
 
