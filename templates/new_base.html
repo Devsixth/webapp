@@ -87,12 +87,21 @@
             </li>
         </ul>
         {% else %}
-        <ul class="navbar-nav ml-auto">
+         <ul class="navbar-nav ml-auto">
             <li class="nav-item">
-                <a class="nav-link" href="{{ url_for('login') }}">Login</a>
-            </li>
-            <li class="nav-item">
-                <a class="nav-link" href="{{ url_for('signup')}}">Register</a>
+                <div class="dropdown">
+                    <a class="nav-link dropdown-toggle" href="#" role="button" data-toggle="dropdown">
+                        <ion-icon name="person-outline"></ion-icon>
+                    </a>
+                    <div class="dropdown-menu dropdown-menu-right">
+                        <a class="dropdown-item" href="{{ url_for('login') }}">
+                            <ion-icon name="log-in-outline"></ion-icon> Login
+                        </a>
+                        <a class="dropdown-item" href="{{ url_for('signup') }}">
+                            <ion-icon name="person-add-outline"></ion-icon> Register
+                        </a>
+                    </div>
+                </div>
             </li>
         </ul>
         {% endif %}
@@ -131,6 +140,9 @@
 <script crossorigin="anonymous"
         integrity="sha384-B4gt1jrGC7Jh4AgTPSdUtOBvfO8shuf57BaghqFfPlYxofvL8/KUEfYiJOMMV+rV"
         src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+<script type="module" src="https://unpkg.com/ionicons@7.1.0/dist/ionicons/ionicons.esm.js"></script>
+<script nomodule src="https://unpkg.com/ionicons@7.1.0/dist/ionicons/ionicons.js"></script>
+
 </body>
 
 </html>
