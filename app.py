@@ -13,7 +13,7 @@ from datetime import datetime, timedelta
 project_id = "64e6e1bc184f94861801"
 
 app = Flask(__name__, static_url_path='/static')
-app.secret_key = os.urandom(24)
+app.secret_key = '123456789'
 login_manager = LoginManager()
 login_manager.init_app(app)
 
