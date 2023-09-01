@@ -91,9 +91,6 @@
                           <ion-icon name="person-outline"></ion-icon>
                       </a>
                     <div class="dropdown-menu dropdown-menu-right">
-                        <a class="dropdown-item" data-toggle="modal" href="#Modal-UserInfo-{{current_user.id}}">
-                             <ion-icon name="log-in-outline"></ion-icon> Welcome, {{current_user.id }}
-                        </a>
                         <a class="dropdown-item" href="{{ url_for('logout') }}">
                              <ion-icon name="person-add-outline"></ion-icon>Logout
                         </a>
