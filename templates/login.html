@@ -1,7 +1,6 @@
 {% extends 'new_base.html' %}
 {% block content %}
     <!-- Login container -->
-
     <div class="container col-md-5">
         <h2>Login to your Account</h2>
         <form action="{{ url_for('login')}}" method="POST">
@@ -24,13 +23,41 @@
             <button type="submit" class="btn btn-primary mt-3">Sign In</button>
         </form>
         <div class="mt-3">
-            <a href="#">Forget Password?</a>
+<!--            <a href="#">Forget Password?</a>-->
+            <button type="button" class="btn btn-link" data-toggle="modal" data-target="#forgotPasswordModal">
+            Forgot Password?
+            </button>
         </div>
         <div class="mt-4">
             <p>Don't have an account? <a href="/signup">Sign Up</a></p>
         </div>
 
     </div>
-
+<!-- Forgot Password Modal -->
+<div class="modal fade" id="forgotPasswordModal" tabindex="-1" role="dialog" aria-labelledby="forgotPasswordModalLabel" aria-hidden="true">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="forgotPasswordModalLabel">Forgot Password</h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                <form action="{{ url_for('forgot_password')}}" method="POST">
+                    <div class="form-group">
+                        <label for="forgotEmail">Email:</label>
+                        <input type="email" class="form-control" id="forgotEmail" name="forgot_email" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="newPassword">New Password:</label>
+                        <input type="password" class="form-control" id="newPassword" name="new_password" required>
+                    </div>
+                    <button type="submit" class="btn btn-primary">Submit</button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
 {% endblock %}
 
