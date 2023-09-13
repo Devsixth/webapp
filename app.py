@@ -56,6 +56,15 @@ def create_new_user(name, email, password, phone):
     return created_user['$id']
 
 
+def reset_password(email, new_password):
+    users = Users(client)
+    for user in users.list()["users"]:
+        if user["email"] == email:
+            status = users.update_password(user["$id"], new_password)
+            return True if status["$id"] else status
+    return False
+
+
 def insert_user(username, email, phone, trading_exp, segment, date, assign_id):
     databases = Databases(client)
     data = {
@@ -66,7 +75,6 @@ def insert_user(username, email, phone, trading_exp, segment, date, assign_id):
         "trading_exp": trading_exp,
         "segment": segment,
         "date": date,
-
     }
     result = databases.create_document(databaseId, collectionId, ID.unique(), data)
     return result['$id']
@@ -251,15 +259,35 @@ def login():
     return render_template('login.html')
 
 
+@app.route('/forgot_password', methods=['POST'])
+def forgot_password():
+    if request.method == 'POST':
+        # Get the email and new password from the form
+        email = request.form['forgot_email']
+        new_password = request.form['new_password']
+        try:
+            reset_status = reset_password(email, new_password)
+            if reset_status is True:
+                flash('Password recovery successful!', category='success')
+                return render_template('login.html')
+            else:
+                flash(f'Password recovery failed. Please check your email', category='danger')
+                return render_template('login.html')
+            # recovery_successful = True  # You should set this based on your implementation
+        except AppwriteException as e:
+            flash(e, category='danger')
+            return render_template('login.html')
+
+
 @app.route('/logout')
 @login_required  # Protect this route, only logged-in users can log out
 def logout():
     logout_user()  # Log out the user
     flash("You have been logged out!", category='info')
     return redirect(url_for('login'))
-    
-if __name__ == '__main__':
-    serve(app, host='0.0.0.0', port=8000)
 
+
+if __name__ == '__main__':
+    app.run(host='0.0.0.0', port=8000, debug=True)
 
 
