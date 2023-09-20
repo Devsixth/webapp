@@ -22,7 +22,9 @@ client.set_endpoint("https://cloud.appwrite.io/v1")
 client.set_project(project_id)
 client.set_key("8905a3d9dd7d7c37ab085c038a34eacfa900ad4fd4a5e9cc5c8a1313ec061e8d06d0a5e1a2529dc1c14a025005f0e90315c04df540e7c53d2016424246aa284f9d22af5f4ec32901f805b458173c9c7d3ba84b509ea0868a30dc452a2f85c63dcac55f23dbe6e485aa87b59b9c0b9619107a613c440972636afc902e1049039b")
 databaseId = "64e6e238bd3d79bda710"
-collectionId = "64e8839e35cdb1292a9d"
+#collectionId = "64e8839e35cdb1292a9d"
+collectionId = "64f0306c5b4b252af383"
+
 
 
 class User(UserMixin):
